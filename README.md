@@ -4,7 +4,7 @@ VSCode support for the [syntax_tree](https://github.com/ruby-syntax-tree/syntax_
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/ruby-syntax-tree/vsocde-syntax-tree.
+Bug reports and pull requests are welcome on GitHub at https://github.com/ruby-syntax-tree/vscode-syntax-tree.
 
 ## License
 
@@ -12,4 +12,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the syntax_tree project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/ruby-syntax-tree/vsocde-syntax-tree/blob/main/CODE_OF_CONDUCT.md).
+Everyone interacting in the syntax_tree project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/ruby-syntax-tree/vscode-syntax-tree/blob/main/CODE_OF_CONDUCT.md).
