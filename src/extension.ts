@@ -1,11 +1,14 @@
 "use strict";
 
-import { ExtensionContext, commands, window } from "vscode";
-import { LanguageClient } from "vscode-languageclient/node";
+import { ExtensionContext, commands, window, workspace } from "vscode";
+import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
+import { promisify } from "util";
+import { exec } from "child_process";
 
 import Implicits from "./Implicits";
-import startLanguageClient from "./startLanguageClient";
 import Visualize from "./Visualize";
+
+const promiseExec = promisify(exec);
 
 export function activate(context: ExtensionContext) {
   let languageClient: LanguageClient | null = null;
@@ -23,17 +26,33 @@ export function activate(context: ExtensionContext) {
 
   async function startLanguageServer() {
     outputChannel.appendLine("Starting language server...");
-    languageClient = await startLanguageClient(outputChannel);
+    let run: ServerOptions = { command: "stree", args: ["lsp"] };
 
-    if (languageClient) {
-      context.subscriptions.push(languageClient.start());
-      await languageClient.onReady();
+    if (workspace.workspaceFolders) {
+      const cwd = workspace.workspaceFolders![0].uri.fsPath;
 
-      context.subscriptions.push(
-        new Implicits(languageClient, outputChannel),
-        new Visualize(languageClient, outputChannel)
-      );
+      try {
+        await promiseExec("bundle show syntax_tree", { cwd });
+        run = { command: "bundle", args: ["exec", "stree", "lsp"], options: { cwd } };
+      } catch {
+        outputChannel.appendLine("No bundled syntax_tree, running global stree.");  
+      }
     }
+
+    languageClient = new LanguageClient("Syntax Tree", { run, debug: run }, {
+      documentSelector: [
+        { scheme: "file", language: "ruby" },
+      ],
+      outputChannel
+    });
+
+    context.subscriptions.push(languageClient.start());
+    await languageClient.onReady();
+
+    context.subscriptions.push(
+      new Implicits(languageClient, outputChannel),
+      new Visualize(languageClient, outputChannel)
+    );
   }
 
   async function stopLanguageServer() {
