@@ -1,3 +1,5 @@
+.token
 node_modules
 *.vsix
 out
+test.rb
