@@ -3,7 +3,6 @@
 import { ExtensionContext, commands, window } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 
-import Disasm from "./Disasm";
 import Implicits from "./Implicits";
 import startLanguageClient from "./startLanguageClient";
 import Visualize from "./Visualize";
@@ -31,7 +30,6 @@ export function activate(context: ExtensionContext) {
       await languageClient.onReady();
 
       context.subscriptions.push(
-        new Disasm(languageClient, outputChannel),
         new Implicits(languageClient, outputChannel),
         new Visualize(languageClient, outputChannel)
       );
