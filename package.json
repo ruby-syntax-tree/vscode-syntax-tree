@@ -23,8 +23,7 @@
     "onCommand:syntaxTree.stop",
     "onCommand:syntaxTree.restart",
     "onCommand:syntaxTree.showOutputChannel",
-    "onCommand:syntaxTree.visualize",
-    "onCommand:syntaxTree.disasm"
+    "onCommand:syntaxTree.visualize"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -48,16 +47,12 @@
       {
         "command": "syntaxTree.visualize",
         "title": "Syntax Tree: Visualize"
-      },
-      {
-        "command": "syntaxTree.disasm",
-        "title": "Syntax Tree: Disassemble"
       }
     ],
     "colors": [
       {
-        "id": "syntaxTree.implicits",
-        "description": "Text color for the inserted implicits",
+        "id": "syntaxTree.inlayHints",
+        "description": "Text color for the inserted inlay hints",
         "defaults": {
           "dark": "#707070",
           "light": "#999999",
@@ -77,9 +72,9 @@
     "vscode-languageclient": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^17.0.8",
-    "@types/vscode": "^1.46.0",
-    "typescript": "^4.2.2",
-    "vsce": "^2.6.7"
+    "@types/node": "^17.0.23",
+    "@types/vscode": "^1.66.0",
+    "typescript": "^4.6.3",
+    "vsce": "^2.7.0"
   }
 }
