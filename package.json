@@ -3,7 +3,7 @@
   "displayName": "Syntax Tree",
   "description": "VSCode support for the syntax_tree gem",
   "icon": "doc/logo.png",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "ruby-syntax-tree",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "url": "https://github.com/ruby-syntax-tree/vscode-syntax-tree/issues"
   },
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.66.0"
   },
   "activationEvents": [
     "onLanguage:ruby",
