@@ -1,12 +1,12 @@
 import { DecorationOptions, DecorationRangeBehavior, Disposable, OutputChannel, Range, TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorDecorationType, ThemeColor, window, workspace } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 
-type Implicit = { position: number, text: string };
-type ImplicitSet = { before: Implicit[], after: Implicit[] };
+type InlayHint = { position: number, text: string };
+type InlayHintSet = { before: InlayHint[], after: InlayHint[] };
 
-class Implicits implements Disposable {
+class InlayHints implements Disposable {
   // The client used to communicate with the language server. In the case of
-  // this class it's used to send a syntaxTree/implicits request.
+  // this class it's used to send a textDocument/inlayHints request.
   private readonly languageClient: LanguageClient;
 
   // The output channel used for logging for this class. It's given from the
@@ -14,7 +14,7 @@ class Implicits implements Disposable {
   private readonly outputChannel: OutputChannel;
 
   private readonly decorationType: TextEditorDecorationType;
-  private readonly implicitsCache: WeakMap<TextDocument, ImplicitSet>;
+  private readonly inlayHintsCache: WeakMap<TextDocument, InlayHintSet>;
   private readonly debouncedHandleTextDocumentChange: Debounced<TextEditor>;
 
   private readonly disposables: Disposable[];
@@ -23,31 +23,31 @@ class Implicits implements Disposable {
     this.languageClient = languageClient;
     this.outputChannel = outputChannel;
   
-    const color = new ThemeColor("syntaxTree.implicits");
+    const color = new ThemeColor("syntaxTree.inlayHints");
     this.decorationType = window.createTextEditorDecorationType({
       before: { color, fontStyle: "normal" },
       after: { color, fontStyle: "normal" },
       rangeBehavior: DecorationRangeBehavior.ClosedClosed
     });
 
-    this.implicitsCache = new WeakMap();
-    this.setImplicitsForEditors(window.visibleTextEditors);
+    this.inlayHintsCache = new WeakMap();
+    this.setInlayHintsForEditors(window.visibleTextEditors);
 
     // Here we're going to debounce the handleTextDocumentChange callback so
     // that we're not reacting too quickly to user inputs and making it flash
     // alll around the editor.
     this.debouncedHandleTextDocumentChange = debounce(300, (editor: TextEditor) => {
       this.outputChannel.appendLine("Handling text document changes (debounced)");
-      this.implicitsCache.delete(editor.document);
-      this.setImplicitsForEditor(editor);
+      this.inlayHintsCache.delete(editor.document);
+      this.setInlayHintsForEditor(editor);
     });
 
     // Track all of the various callbacks and objects that implement Disposable
-    // so that when we need to dispose of the entire Implicits instance we can
+    // so that when we need to dispose of the entire InlayHints instance we can
     // iterate through and dispose all of them.
     this.disposables = [
       this.decorationType,
-      window.onDidChangeVisibleTextEditors(this.setImplicitsForEditors, this),
+      window.onDidChangeVisibleTextEditors(this.setInlayHintsForEditors, this),
       workspace.onDidChangeTextDocument(this.handleTextDocumentChange, this),
       this.debouncedHandleTextDocumentChange
     ];
@@ -63,20 +63,20 @@ class Implicits implements Disposable {
     if (editor !== undefined && event.document === editor.document) {
       this.debouncedHandleTextDocumentChange(editor);
     } else {
-      this.implicitsCache.delete(event.document);
+      this.inlayHintsCache.delete(event.document);
     }
   }
 
-  // Asynchronously get the implicits for a given text document, optionally
+  // Asynchronously get the inlay hints for a given text document, optionally
   // using a cache if it has already been populated.
-  async getImplicitsForTextDocument(document: TextDocument): Promise<ImplicitSet | undefined> {
+  async getInlayHintsForTextDocument(document: TextDocument): Promise<InlayHintSet | undefined> {
     if (document.languageId !== "ruby") {
       // This editor may have previously been a Ruby file, but that has now
-      // changed. So we should delete the implicits that may be there.
-      if (this.implicitsCache.has(document)) {
-        this.implicitsCache.delete(document);
+      // changed. So we should delete the inlay hints that may be there.
+      if (this.inlayHintsCache.has(document)) {
+        this.inlayHintsCache.delete(document);
 
-        // Return an empty set of implicits so that it gets properly cleared
+        // Return an empty set of inlay hints so that it gets properly cleared
         // from the document.
         return { before: [], after: [] };
       }
@@ -86,56 +86,56 @@ class Implicits implements Disposable {
       return undefined;
     }
 
-    // Check the cache first to see if we have already computed the implicits
+    // Check the cache first to see if we have already computed the inlay hints
     // for this document. Return them if we have them.
-    let implicits = this.implicitsCache.get(document);
-    if (implicits) {
-      this.outputChannel.appendLine("Loading implicits from cache");
-      return implicits;
+    let inlayHints = this.inlayHintsCache.get(document);
+    if (inlayHints) {
+      this.outputChannel.appendLine("Loading inlay hints from cache");
+      return inlayHints;
     }
 
-    // Otherwise, asynchronously request the implicits from the language server,
-    // cache the response, and return it.
-    this.outputChannel.appendLine("Requesting implicits");
-    implicits = await this.languageClient.sendRequest<ImplicitSet>("syntaxTree/implicits", {
+    // Otherwise, asynchronously request the inlay hints from the language
+    // server, cache the response, and return it.
+    this.outputChannel.appendLine("Requesting inlay hints");
+    inlayHints = await this.languageClient.sendRequest<InlayHintSet>("textDocument/inlayHints", {
       textDocument: { uri: document.uri.toString() }
     });
 
     // In case of a syntax error, this is not going to return anything. In that
     // case, we don't want to set the cache to anything, but we also don't want
-    // to clear the previous implicits either. So we're just going to return
+    // to clear the previous inlay hints either. So we're just going to return
     // undefined
-    if (!implicits) {
+    if (!inlayHints) {
       return undefined;
     }
 
-    this.implicitsCache.set(document, implicits);
-    return implicits;
+    this.inlayHintsCache.set(document, inlayHints);
+    return inlayHints;
   }
 
-  async setImplicitsForEditor(editor: TextEditor) {
-    const implicits = await this.getImplicitsForTextDocument(editor.document);
-    if (!implicits) {
+  async setInlayHintsForEditor(editor: TextEditor) {
+    const inlayHints = await this.getInlayHintsForTextDocument(editor.document);
+    if (!inlayHints) {
       return;
     }
 
     const decorations: DecorationOptions[] = [
-      ...implicits.before.map(({ position, text: contentText }) => ({
+      ...inlayHints.before.map(({ position, text: contentText }) => ({
         range: new Range(editor.document.positionAt(position), editor.document.positionAt(position)),
         renderOptions: { before: { contentText } }
       })),
-      ...implicits.after.map(({ position, text: contentText }) => ({
+      ...inlayHints.after.map(({ position, text: contentText }) => ({
         range: new Range(editor.document.positionAt(position), editor.document.positionAt(position)),
         renderOptions: { after: { contentText } }
       }))
     ];
 
-    this.outputChannel.appendLine("Settings implicits");
+    this.outputChannel.appendLine("Settings inlay hints");
     editor.setDecorations(this.decorationType, decorations);
   }
 
-  setImplicitsForEditors(editors: readonly TextEditor[]) {
-    editors.forEach((editor) => this.setImplicitsForEditor(editor));
+  setInlayHintsForEditors(editors: readonly TextEditor[]) {
+    editors.forEach((editor) => this.setInlayHintsForEditor(editor));
   }
 }
 
@@ -187,4 +187,4 @@ function debounce<T extends object>(delay: number, callback: (argument: T) => vo
   return debounced;
 }
 
-export default Implicits;
+export default InlayHints;

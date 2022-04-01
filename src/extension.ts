@@ -5,7 +5,7 @@ import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { promisify } from "util";
 import { exec } from "child_process";
 
-import Implicits from "./Implicits";
+import InlayHints from "./InlayHints";
 import Visualize from "./Visualize";
 
 const promiseExec = promisify(exec);
@@ -50,7 +50,7 @@ export function activate(context: ExtensionContext) {
     await languageClient.onReady();
 
     context.subscriptions.push(
-      new Implicits(languageClient, outputChannel),
+      new InlayHints(languageClient, outputChannel),
       new Visualize(languageClient, outputChannel)
     );
   }
