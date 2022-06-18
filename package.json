@@ -49,6 +49,30 @@
         "title": "Syntax Tree: Visualize"
       }
     ],
+    "configuration": {
+      "type": "object",
+      "title": "Syntax Tree",
+      "properties": {
+        "syntaxTree.singleQuotes": {
+          "default": false,
+          "markdownDescription": "Uses single-quoted strings when possible.",
+          "type": "boolean"
+        },
+        "syntaxTree.trailingComma": {
+          "default": false,
+          "markdownDescription": "Adds an extra comma after the last item of arrays, hashes and parameters.",
+          "type": "boolean"
+        },
+        "syntaxTree.additionalPlugins": {
+          "default": [],
+          "markdownDescription": "Registers [extra behaviors](https://github.com/ruby-syntax-tree/syntax_tree#plugins) with the language server.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      }
+    },
     "colors": [
       {
         "id": "syntaxTree.inlayHints",

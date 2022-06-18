@@ -1,6 +1,6 @@
 "use strict";
 
-import { ExtensionContext, commands, window, workspace } from "vscode";
+import { ConfigurationChangeEvent, ExtensionContext, commands, window, workspace } from "vscode";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { promisify } from "util";
 import { exec } from "child_process";
@@ -27,8 +27,28 @@ export function activate(context: ExtensionContext) {
   return startLanguageServer();
 
   async function startLanguageServer() {
-    outputChannel.appendLine("Starting language server...");
-    let run: ServerOptions = { command: "stree", args: ["lsp"] };
+    const config = workspace.getConfiguration("syntaxTree");
+    const addlPlugins = config.get<string[]>("additionalPlugins") || [];
+    const singleQuotes = config.get<boolean>("singleQuotes");
+    const trailingComma = config.get<boolean>("trailingComma");
+
+    const args = ["lsp"];
+
+    const plugins = new Set<string>();
+    if (singleQuotes) {
+      plugins.add("plugin/single_quotes");
+    }
+    if (trailingComma) {
+      plugins.add("plugin/trailing_comma");
+    }
+    addlPlugins.forEach(plugins.add);
+
+    if (plugins.size) {
+      args.push(`--plugins=${Array.from(plugins).join(",")}`);
+    }
+
+    outputChannel.appendLine(`Starting language server with ${plugins.size} plugin(s)...`);
+    let run: ServerOptions = { command: "stree", args };
 
     if (workspace.workspaceFolders) {
       const cwd = workspace.workspaceFolders![0].uri.fsPath;
