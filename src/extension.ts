@@ -11,13 +11,15 @@ import Visualize from "./Visualize";
 const promiseExec = promisify(exec);
 
 export function activate(context: ExtensionContext) {
-  let languageClient: LanguageClient | null = null;
   const outputChannel = window.createOutputChannel("Syntax Tree");
+  let languageClient: LanguageClient | null = null;
+  let visualizer: Visualize | null = null;
 
   context.subscriptions.push(
     commands.registerCommand("syntaxTree.start", startLanguageServer),
     commands.registerCommand("syntaxTree.stop", stopLanguageServer),
     commands.registerCommand("syntaxTree.restart", restartLanguageServer),
+    commands.registerCommand("syntaxTree.visualize", () => visualizer?.visualize()),
     commands.registerCommand("syntaxTree.showOutputChannel", () => outputChannel.show()),
     outputChannel
   );
@@ -35,7 +37,7 @@ export function activate(context: ExtensionContext) {
         await promiseExec("bundle show syntax_tree", { cwd });
         run = { command: "bundle", args: ["exec", "stree", "lsp"], options: { cwd } };
       } catch {
-        outputChannel.appendLine("No bundled syntax_tree, running global stree.");  
+        outputChannel.appendLine("No bundled syntax_tree, running global stree.");
       }
     }
 
@@ -49,9 +51,10 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(languageClient.start());
     await languageClient.onReady();
 
+    visualizer = new Visualize(languageClient, outputChannel);
     context.subscriptions.push(
       new InlayHints(languageClient, outputChannel),
-      new Visualize(languageClient, outputChannel)
+      visualizer
     );
   }
 

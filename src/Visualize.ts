@@ -17,7 +17,6 @@ class Visualize implements Disposable, TextDocumentContentProvider {
     this.languageClient = languageClient;
     this.outputChannel = outputChannel;
     this.disposables = [
-      commands.registerCommand("syntaxTree.visualize", this.visualize),
       workspace.registerTextDocumentContentProvider("syntaxTree.visualize", this)
     ];
   }
@@ -40,7 +39,7 @@ class Visualize implements Disposable, TextDocumentContentProvider {
       const doc = await workspace.openTextDocument(uri);
       languages.setTextDocumentLanguage(doc, "plaintext");
 
-			await window.showTextDocument(doc, ViewColumn.Beside, true);
+      await window.showTextDocument(doc, ViewColumn.Beside, true);
     }
   }
 }
