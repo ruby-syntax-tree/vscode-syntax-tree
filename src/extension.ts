@@ -16,12 +16,15 @@ export function activate(context: ExtensionContext) {
   let visualizer: Visualize | null = null;
 
   context.subscriptions.push(
+    outputChannel,
     commands.registerCommand("syntaxTree.start", startLanguageServer),
     commands.registerCommand("syntaxTree.stop", stopLanguageServer),
     commands.registerCommand("syntaxTree.restart", restartLanguageServer),
     commands.registerCommand("syntaxTree.visualize", () => visualizer?.visualize()),
     commands.registerCommand("syntaxTree.showOutputChannel", () => outputChannel.show()),
-    outputChannel
+    workspace.onDidChangeConfiguration(event =>
+      event.affectsConfiguration("syntaxTree") &&
+      restartLanguageServer())
   );
 
   return startLanguageServer();
