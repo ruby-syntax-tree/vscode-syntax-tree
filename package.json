@@ -60,7 +60,7 @@
         },
         "syntaxTree.trailingComma": {
           "default": false,
-          "markdownDescription": "Adds an extra comma after the last item of arrays, hashes and parameters.",
+          "markdownDescription": "Adds a trailing comma to multi-line array literals, hash literals, and method parameters.",
           "type": "boolean"
         },
         "syntaxTree.additionalPlugins": {
