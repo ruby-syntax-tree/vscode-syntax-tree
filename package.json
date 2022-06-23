@@ -93,7 +93,7 @@
     "watch": "tsc --watch -p ./"
   },
   "dependencies": {
-    "vscode-languageclient": "^7.0.0"
+    "vscode-languageclient": "^8.0.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
