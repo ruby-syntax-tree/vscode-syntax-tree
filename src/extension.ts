@@ -10,14 +10,18 @@ import Visualize from "./Visualize";
 
 const promiseExec = promisify(exec);
 
-// This is the expected top-level export that is called by VSCode.
-export function activate(context: ExtensionContext) {
+// This object will get initialized once the language client is ready. It will
+// get set back to null when the extension is deactivated.
+let languageClient: LanguageClient | null = null;
+
+// This is the expected top-level export that is called by VSCode when the
+// extension is activated.
+export async function activate(context: ExtensionContext) {
   // This output channel is going to contain all of our informational messages.
   // It's not really meant for the end-user, it's more for debugging.
   const outputChannel = window.createOutputChannel("Syntax Tree");
 
-  // These objects will get initialized once the language client is ready.
-  let languageClient: LanguageClient | null = null;
+  // This object will get initialized once the language client is ready.
   let visualizer: Visualize | null = null;
 
   // This is the list of objects that implement the Disposable interface. They
@@ -46,7 +50,7 @@ export function activate(context: ExtensionContext) {
 
   // We're returning a Promise from this function that will start the Ruby
   // subprocess.
-  return startLanguageServer();
+  await startLanguageServer();
 
   // This function is called when the extension is activated or when the
   // language server is restarted.
@@ -110,8 +114,7 @@ export function activate(context: ExtensionContext) {
     });
 
     // Here we're going to wait for the language server to start.
-    context.subscriptions.push(languageClient.start());
-    await languageClient.onReady();
+    await languageClient.start();
 
     // Finally, now that the language server has been properly started, we can
     // add the various features to the extension. Each of them in turn
@@ -141,4 +144,11 @@ export function activate(context: ExtensionContext) {
     await stopLanguageServer();
     await startLanguageServer();
   }
+}
+
+// This is the expected top-level export that is called by VSCode when the
+// extension is deactivated.
+export async function deactivate() {
+  await languageClient?.stop();
+  languageClient = null;
 }
