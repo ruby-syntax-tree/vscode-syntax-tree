@@ -1,0 +1,34 @@
+name: Main
+on:
+- push
+- pull_request_target
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 14.x
+        cache: yarn
+    - name: Compile
+      run: |
+        yarn install --frozen-lockfile
+        yarn compile
+  automerge:
+    name: AutoMerge
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target' && (github.actor == github.repository_owner || github.actor == 'dependabot[bot]')
+    steps:
+    - uses: actions/github-script@v3
+      with:
+        script: |
+          github.pulls.merge({
+            owner: context.payload.repository.owner.login,
+            repo: context.payload.repository.name,
+            pull_number: context.payload.pull_request.number
+          })
