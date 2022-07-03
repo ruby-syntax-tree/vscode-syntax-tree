@@ -73,17 +73,7 @@
         }
       }
     },
-    "colors": [
-      {
-        "id": "syntaxTree.inlayHints",
-        "description": "Text color for the inserted inlay hints",
-        "defaults": {
-          "dark": "#707070",
-          "light": "#999999",
-          "highContrast": "foreground"
-        }
-      }
-    ]
+    "colors": []
   },
   "scripts": {
     "compile": "tsc -p ./",
