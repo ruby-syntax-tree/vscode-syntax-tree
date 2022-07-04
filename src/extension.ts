@@ -5,7 +5,6 @@ import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { promisify } from "util";
 import { exec } from "child_process";
 
-import InlayHints from "./InlayHints";
 import Visualize from "./Visualize";
 
 const promiseExec = promisify(exec);
@@ -121,7 +120,6 @@ export async function activate(context: ExtensionContext) {
     // implements Disposable so that they clean up their own resources.
     visualizer = new Visualize(languageClient, outputChannel);
     context.subscriptions.push(
-      new InlayHints(languageClient, outputChannel),
       visualizer
     );
   }
