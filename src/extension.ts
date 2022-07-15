@@ -47,9 +47,9 @@ export async function activate(context: ExtensionContext) {
     })
   );
 
-  // We're returning a Promise from this function that will start the Ruby
-  // subprocess.
-  await startLanguageServer();
+  // If there's an open folder, use it as cwd when spawning commands
+  // to promote correct package & language versioning.
+  const getCWD = () => workspace.workspaceFolders?.[0]?.uri?.fsPath || process.cwd();
 
   // This function is called when the extension is activated or when the
   // language server is restarted.
@@ -82,26 +82,26 @@ export async function activate(context: ExtensionContext) {
       args.push(`--plugins=${Array.from(plugins).join(",")}`);
     }
 
-    outputChannel.appendLine(`Starting language server with ${plugins.size} plugin(s)...`);
-    let run: ServerOptions = { command: "stree", args };
-
     // There's a bit of complexity here. Basically, if there's an open folder,
-    // then w're going to check if the syntax_tree gem is inside the bundle. If
+    // then we're going to check if the syntax_tree gem is inside the bundle. If
     // it is, then we'll run bundle exec stree. This is good, because it'll
     // ensure that we get the correct version of the gem. If it's not in the
     // bundle or there is no bundle, then we'll just run the global stree. This
     // might be correct in the end if the right environment variables are set,
     // but it's a bit of a prayer.
-    if (workspace.workspaceFolders) {
-      const cwd = workspace.workspaceFolders![0].uri.fsPath;
+    const cwd = getCWD();
+    let run: ServerOptions = { command: "stree", args };
+    let where = 'global';
 
-      try {
-        await promiseExec("bundle show syntax_tree", { cwd });
-        run = { command: "bundle", args: ["exec", "stree", "lsp"], options: { cwd } };
-      } catch {
-        outputChannel.appendLine("No bundled syntax_tree, running global stree.");
-      }
+    try {
+      await promiseExec("bundle show syntax_tree", { cwd });
+      run = { command: "bundle", args: ["exec", "stree", "lsp"], options: { cwd } };
+      where = 'bundled';
+    } catch {
+      // No-op (just keep using the global stree)
     }
+
+    outputChannel.appendLine(`Starting language server with ${where} stree and ${plugins.size} plugin(s)...`);
 
     // Here, we instantiate the language client. This is the object that is
     // responsible for the communication and management of the Ruby subprocess.
@@ -112,16 +112,39 @@ export async function activate(context: ExtensionContext) {
       outputChannel
     });
 
-    // Here we're going to wait for the language server to start.
-    await languageClient.start();
+    try {
+      // Here we're going to wait for the language server to start.
+      await languageClient.start();
+      // Finally, now that the language server has been properly started, we can
+      // add the various features to the extension. Each of them in turn
+      // implements Disposable so that they clean up their own resources.
+      visualizer = new Visualize(languageClient, outputChannel);
+      context.subscriptions.push(
+        visualizer
+      );
+    } catch (e: any) {
+      languageClient = null;
+      const items = ['Restart']
+      let msg = 'Something went wrong.';
+      if (typeof e === 'string') {
+        if (/ENOENT/.test(e)) {
+          msg = 'Command not found. Is the syntax_tree RubyGem installed?';
+          items.unshift('Install Gem');
+        }
+      }
 
-    // Finally, now that the language server has been properly started, we can
-    // add the various features to the extension. Each of them in turn
-    // implements Disposable so that they clean up their own resources.
-    visualizer = new Visualize(languageClient, outputChannel);
-    context.subscriptions.push(
-      visualizer
-    );
+      const action = await window.showErrorMessage(msg, ...items);
+      switch (action) {
+        case 'Install Gem':
+          installGem();
+          break;
+        case 'Restart':
+          startLanguageServer();
+          break;
+      }
+      if (action === 'Restart') {
+      }
+    }
   }
 
   // This function is called as part of the shutdown or restart process. It's
@@ -142,6 +165,22 @@ export async function activate(context: ExtensionContext) {
     await stopLanguageServer();
     await startLanguageServer();
   }
+
+  // This function is called when the user wants to recover from ENOENT
+  // on start. It starts the language server afterward.
+  async function installGem() {
+    const cwd = getCWD();
+    try {
+      await promiseExec("gem install syntax_tree", { cwd });
+      startLanguageServer();
+    } catch (e) {
+      outputChannel.appendLine("Error installing gem: " + e);
+    }
+  }
+
+  // We're returning a Promise from this function that will start the Ruby
+  // subprocess.
+  await startLanguageServer();
 }
 
 // This is the expected top-level export that is called by VSCode when the
