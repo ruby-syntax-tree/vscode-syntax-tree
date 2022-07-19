@@ -55,7 +55,7 @@
       "properties": {
         "syntaxTree.printWidth": {
           "default": 80,
-          "markdownDescription": "The maximum line width to use when formatting.",
+          "markdownDescription": "The width to be used when formatting code.",
           "type": "number"
         },
         "syntaxTree.singleQuotes": {
