@@ -53,6 +53,11 @@
       "type": "object",
       "title": "Syntax Tree",
       "properties": {
+        "syntaxTree.printWidth": {
+          "default": 80,
+          "markdownDescription": "The width to be used when formatting code.",
+          "type": "number"
+        },
         "syntaxTree.singleQuotes": {
           "default": false,
           "markdownDescription": "Uses single-quoted strings when possible.",
