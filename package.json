@@ -82,8 +82,8 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
-    "package": "vsce package --yarn --githubBranch main",
-    "publish": "vsce publish --yarn --githubBranch main",
+    "package": "vsce package --no-yarn --githubBranch main",
+    "publish": "vsce publish --no-yarn --githubBranch main",
     "test": "node ./out/test/runTest.js",
     "vscode:prepublish": "yarn compile",
     "watch": "tsc --watch -p ./"
