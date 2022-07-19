@@ -88,7 +88,7 @@ export async function activate(context: ExtensionContext) {
     }
 
     // Configure print width.
-    args.push(`--print-width=${config.get<number>("maximumLineWidth")}`)
+    args.push(`--print-width=${config.get<number>("printWidth")}`)
 
     // There's a bit of complexity here. Basically, if there's an open folder,
     // then we're going to check if the syntax_tree gem is inside the bundle. If
