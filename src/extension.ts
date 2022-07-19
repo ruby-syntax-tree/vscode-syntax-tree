@@ -95,7 +95,7 @@ export async function activate(context: ExtensionContext) {
 
     try {
       await promiseExec("bundle show syntax_tree", { cwd });
-      run = { command: "bundle", args: ["exec", "stree", "lsp"], options: { cwd } };
+      run = { command: "bundle", args: ["exec", "stree"].concat(args), options: { cwd } };
       where = 'bundled';
     } catch {
       // No-op (just keep using the global stree)
