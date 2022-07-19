@@ -98,7 +98,7 @@
     "@types/vscode": "^1.68.0",
     "@vscode/test-electron": "^1.6.1",
     "glob": "^7.1.4",
-    "mocha": "^9.1.1",
+    "mocha": "^10.0.0",
     "typescript": "^4.7.4",
     "vsce": "^2.9.2"
   }
