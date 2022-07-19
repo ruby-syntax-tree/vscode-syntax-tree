@@ -1,34 +1,116 @@
 name: Main
 on:
-- push
-- pull_request_target
+  - push
+  - pull_request_target
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          # - macos-latest
+          - ubuntu-latest
+          # - windows-latest
+        ruby:
+          - 3.1
+          # - 3.0
+          # - 2.7
+    runs-on: ${{ matrix.os }}
     env:
       CI: true
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 14.x
-        cache: yarn
-    - name: Compile
-      run: |
-        yarn install --frozen-lockfile
-        yarn compile
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+          cache: yarn
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: ${{ matrix.ruby }}
+      - name: Install gem
+        run: gem install syntax_tree
+      - name: Compile extension
+        run: |
+          yarn install --frozen-lockfile
+          yarn compile
+      - name: Setup GUI Environment
+        run: |
+          sudo apt-get install -yq dbus-x11 ffmpeg > /dev/null
+          mkdir -p ~/bin
+          mkdir -p ~/var/run
+          cat <<EOF > ~/bin/xvfb-shim
+          #! /bin/bash
+          echo DISPLAY=\$DISPLAY >> ${GITHUB_ENV}
+          echo XAUTHORITY=\$XAUTHORITY >> ${GITHUB_ENV}
+          sleep 86400
+          EOF
+          chmod a+x ~/bin/xvfb-shim
+          dbus-launch >> ${GITHUB_ENV}
+          start-stop-daemon --start --quiet --pidfile ~/var/run/Xvfb.pid --make-pidfile --background --exec /usr/bin/xvfb-run -- ~/bin/xvfb-shim
+          echo -n "Waiting for Xvfb to start..."
+          while ! grep -q DISPLAY= ${GITHUB_ENV}; do
+            echo -n .
+            sleep 3
+          done
+        if: runner.os == 'Linux'
+      - name: Start Screen Recording
+        run: |
+          mkdir -p $PWD/videos-raw
+          no_close=--no-close # uncomment to see ffmpeg output (i.e. leave stdio open)
+          start-stop-daemon $no_close --start --quiet --pidfile ~/var/run/ffmpeg.pid --make-pidfile --background --exec /usr/bin/ffmpeg -- -nostdin -f x11grab -video_size 1280x1024 -framerate 10 -i ${DISPLAY}.0+0,0 $PWD/videos-raw/test.mp4
+          # pid=`cat ~/var/run/ffmpeg.pid`
+          # echo "Waiting for ffmpeg (pid $pid) to start recording (display $DISPLAY)..."
+          # while [ ! -f $PWD/videos-raw/test.mp4 ]; do
+          #   echo -n .
+          #   sleep 3
+          # done
+        if: runner.os == 'Linux'
+      - name: Cache VS Code Binary
+        id: vscode-test
+        uses: actions/cache@v3
+        with:
+          path: .vscode-test/
+          key: ${{ runner.os }}-vscode-test
+      # - name: SSH Debug Breakpoint
+      #   uses: lhotari/action-upterm@v1
+      #   with:
+      #     limit-access-to-actor: true
+      - name: Run Tests
+        run: npm test
+      - name: Stop Screen Recording
+        run: |
+          start-stop-daemon --stop --pidfile ~/var/run/ffmpeg.pid
+          sleep 3
+          mkdir -p $PWD/videos
+          for f in $PWD/videos-raw/*.mp4; do
+            out=`basename $f`
+            ffmpeg -i $f -vf format=yuv420p $PWD/videos/$out
+          done
+        if: always() && runner.os == 'Linux'
+      - name: Archive Screen Recording
+        uses: actions/upload-artifact@v3
+        with:
+          name: videos
+          path: |
+            videos/
+        if: always() && runner.os == 'Linux'
+      - name: Teardown GUI Environment
+        run: |
+          start-stop-daemon --stop --pidfile ~/var/run/Xvfb.pid
+          kill $DBUS_SESSION_BUS_PID
+        if: always() && runner.os == 'Linux'
   automerge:
     name: AutoMerge
     needs: ci
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request_target' && (github.actor == github.repository_owner || github.actor == 'dependabot[bot]')
     steps:
-    - uses: actions/github-script@v6
-      with:
-        script: |
-          github.pulls.merge({
-            owner: context.payload.repository.owner.login,
-            repo: context.payload.repository.name,
-            pull_number: context.payload.pull_request.number
-          })
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.pulls.merge({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              pull_number: context.payload.pull_request.number
+            })
