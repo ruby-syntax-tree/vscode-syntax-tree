@@ -53,6 +53,11 @@
       "type": "object",
       "title": "Syntax Tree",
       "properties": {
+        "syntaxTree.maximumLineWidth": {
+          "default": 80,
+          "markdownDescription": "The maximum line width to use when formatting.",
+          "type": "number"
+        },
         "syntaxTree.singleQuotes": {
           "default": false,
           "markdownDescription": "Uses single-quoted strings when possible.",
