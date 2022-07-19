@@ -10,8 +10,9 @@ import Visualize from "./Visualize";
 const promiseExec = promisify(exec);
 
 // This object will get initialized once the language client is ready. It will
-// get set back to null when the extension is deactivated.
-let languageClient: LanguageClient | null = null;
+// get set back to null when the extension is deactivated. It is exported for
+// easier testing.
+export let languageClient: LanguageClient | null = null;
 
 // This is the expected top-level export that is called by VSCode when the
 // extension is activated.
@@ -54,6 +55,10 @@ export async function activate(context: ExtensionContext) {
   // This function is called when the extension is activated or when the
   // language server is restarted.
   async function startLanguageServer() {
+    if (languageClient) {
+      return; // preserve idempotency
+    }
+
     // The top-level configuration group is syntaxTree. All of the configuration
     // for the extension is under that group.
     const config = workspace.getConfiguration("syntaxTree");
@@ -142,8 +147,6 @@ export async function activate(context: ExtensionContext) {
           startLanguageServer();
           break;
       }
-      if (action === 'Restart') {
-      }
     }
   }
 
@@ -154,6 +157,7 @@ export async function activate(context: ExtensionContext) {
     if (languageClient) {
       outputChannel.appendLine("Stopping language server...");
       await languageClient.stop();
+      languageClient = null;
     }
   }
 
