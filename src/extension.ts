@@ -1,10 +1,12 @@
 "use strict";
 
+import { exec } from "child_process";
+import * as fs from "fs";
+import { promisify } from "util";
 import { ExtensionContext, commands, window, workspace } from "vscode";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
-import { promisify } from "util";
-import { exec } from "child_process";
 
+import * as variables from './variables';
 import Visualize from "./Visualize";
 
 const promiseExec = promisify(exec);
@@ -59,9 +61,11 @@ export async function activate(context: ExtensionContext) {
       return; // preserve idempotency
     }
 
-    // The top-level configuration group is syntaxTree. All of the configuration
-    // for the extension is under that group.
+    // The top-level configuration group is syntaxTree. Broadly useful settings
+    // are under that group.
     const config = workspace.getConfiguration("syntaxTree");
+    // More obscure settings for power users live in a subgroup.
+    const advancedConfig = workspace.getConfiguration("syntaxTree.advanced");
 
     // The args are going to be passed to the stree executable. It's important
     // that it lines up with what the CLI expects.
@@ -90,26 +94,41 @@ export async function activate(context: ExtensionContext) {
     // Configure print width.
     args.push(`--print-width=${config.get<number>("printWidth")}`)
 
-    // There's a bit of complexity here. Basically, if there's an open folder,
-    // then we're going to check if the syntax_tree gem is inside the bundle. If
-    // it is, then we'll run bundle exec stree. This is good, because it'll
-    // ensure that we get the correct version of the gem. If it's not in the
-    // bundle or there is no bundle, then we'll just run the global stree. This
-    // might be correct in the end if the right environment variables are set,
-    // but it's a bit of a prayer.
-    const cwd = getCWD();
+    // There's a bit of complexity here. Basically, we try to locate
+    // an stree executable in three places, in order of preference:
+    //   1. Explicit path from advanced settings, if provided
+    //   2. The bundle inside CWD, if syntax_tree is in the bundle
+    //   3. Anywhere in $PATH (i.e. system gem)
+    //
+    // None of these approaches is perfect. System gem might be correct if the
+    // right environment variables are set, but it's a bit of a prayer. Bundled
+    // gem is better, but we make the gross oversimplification that the
+    // workspace only has one root and that the bundle is at root of the
+    // workspace -- which is not true for large projects or monorepos.
+    // Explicit path varies between machines/users and is also victim to the
+    // oversimplification problem.
     let run: ServerOptions = { command: "stree", args };
-    let where = 'global';
-
-    try {
-      await promiseExec("bundle show syntax_tree", { cwd });
-      run = { command: "bundle", args: ["exec", "stree"].concat(args), options: { cwd } };
-      where = 'bundled';
-    } catch {
-      // No-op (just keep using the global stree)
+    let commandPath = advancedConfig.get<string>('commandPath');
+    if (commandPath) {
+      commandPath = variables.substitute(commandPath);
+      try {
+        if (fs.statSync(commandPath).isFile()) {
+          run = { command: commandPath, args };
+        }
+      } catch (err) {
+        outputChannel.appendLine(`Ignoring bogus commandPath (${commandPath} does not exist); falling back to global.`);
+      }
+    } else {
+      try {
+        const cwd = getCWD();
+        await promiseExec("bundle show syntax_tree", { cwd });
+        run = { command: "bundle", args: ["exec", "stree"].concat(args), options: { cwd } };
+      } catch {
+        // No-op (just keep using the global stree)
+      }
     }
 
-    outputChannel.appendLine(`Starting language server with ${where} stree and ${plugins.size} plugin(s)...`);
+    outputChannel.appendLine(`Starting language server: ${run.command} ${run.args?.join(' ')}`);
 
     // Here, we instantiate the language client. This is the object that is
     // responsible for the communication and management of the Ruby subprocess.

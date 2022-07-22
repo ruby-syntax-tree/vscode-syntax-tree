@@ -1,111 +1,124 @@
 {
-	"name": "vscode-syntax-tree",
-	"displayName": "Syntax Tree",
-	"description": "VSCode support for the syntax_tree gem",
-	"icon": "doc/logo.png",
-	"version": "0.3.1",
-	"publisher": "ruby-syntax-tree",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/ruby-syntax-tree/vscode-syntax-tree.git"
-	},
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/ruby-syntax-tree/vscode-syntax-tree/issues"
-	},
-	"engines": {
-		"vscode": "^1.68.0"
-	},
-	"activationEvents": [
-		"onLanguage:ruby",
-		"workspaceContains:Gemfile.lock",
-		"onCommand:syntaxTree.start",
-		"onCommand:syntaxTree.stop",
-		"onCommand:syntaxTree.restart",
-		"onCommand:syntaxTree.showOutputChannel",
-		"onCommand:syntaxTree.visualize"
-	],
-	"main": "./out/extension",
-	"contributes": {
-		"commands": [
-			{
-				"command": "syntaxTree.start",
-				"title": "Syntax Tree: Start"
-			},
-			{
-				"command": "syntaxTree.stop",
-				"title": "Syntax Tree: Stop"
-			},
-			{
-				"command": "syntaxTree.restart",
-				"title": "Syntax Tree: Restart"
-			},
-			{
-				"command": "syntaxTree.showOutputChannel",
-				"title": "Syntax Tree: Show Output Channel"
-			},
-			{
-				"command": "syntaxTree.visualize",
-				"title": "Syntax Tree: Visualize"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Syntax Tree",
-			"properties": {
-				"syntaxTree.printWidth": {
-					"default": 80,
-					"markdownDescription": "The width to be used when formatting code.",
-					"type": "number"
-				},
-				"syntaxTree.singleQuotes": {
-					"default": false,
-					"markdownDescription": "Uses single-quoted strings when possible.",
-					"type": "boolean"
-				},
-				"syntaxTree.trailingComma": {
-					"default": false,
-					"markdownDescription": "Adds a trailing comma to multi-line array literals, hash literals, and method parameters.",
-					"type": "boolean"
-				},
-				"syntaxTree.additionalPlugins": {
-					"default": [],
-					"markdownDescription": "Registers [extra behaviors](https://github.com/ruby-syntax-tree/syntax_tree#plugins) with the language server.",
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				}
-			}
-		},
-		"colors": []
-	},
-	"scripts": {
-		"compile": "tsc -p ./",
-		"package": "vsce package --no-yarn --githubBranch main",
-		"publish": "vsce publish --no-yarn --githubBranch main",
-		"test": "node ./out/test/runTest.js",
-		"vscode:prepublish": "yarn compile",
-		"watch": "tsc --watch -p ./"
-	},
-	"dependencies": {
-		"vscode-languageclient": "8.0.2"
-	},
-	"devDependencies": {
-		"@types/glob": "^7.1.1",
-		"@types/mocha": "^9.1.1",
-		"@types/node": "^18.0.0",
-		"@types/vscode": "^1.68.0",
-		"@vscode/test-electron": "^1.6.2",
-		"glob": "^8.0.3",
-		"mocha": "^10.0.0",
-		"typescript": "^4.7.4",
-		"vsce": "^2.9.2"
-	},
-	"__metadata": {
-		"id": "b46118f9-0f6f-4320-9e2e-75c96492b4cb",
-		"publisherDisplayName": "ruby-syntax-tree",
-		"publisherId": "63942dce-de09-44d8-b863-4a1dbd5508c6",
-		"isPreReleaseVersion": false
-	}
+  "name": "vscode-syntax-tree",
+  "displayName": "Syntax Tree",
+  "description": "VSCode support for the syntax_tree gem",
+  "icon": "doc/logo.png",
+  "version": "0.3.1",
+  "publisher": "ruby-syntax-tree",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruby-syntax-tree/vscode-syntax-tree.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ruby-syntax-tree/vscode-syntax-tree/issues"
+  },
+  "engines": {
+    "vscode": "^1.68.0"
+  },
+  "activationEvents": [
+    "onLanguage:ruby",
+    "workspaceContains:Gemfile.lock",
+    "onCommand:syntaxTree.start",
+    "onCommand:syntaxTree.stop",
+    "onCommand:syntaxTree.restart",
+    "onCommand:syntaxTree.showOutputChannel",
+    "onCommand:syntaxTree.visualize"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "syntaxTree.start",
+        "title": "Syntax Tree: Start"
+      },
+      {
+        "command": "syntaxTree.stop",
+        "title": "Syntax Tree: Stop"
+      },
+      {
+        "command": "syntaxTree.restart",
+        "title": "Syntax Tree: Restart"
+      },
+      {
+        "command": "syntaxTree.showOutputChannel",
+        "title": "Syntax Tree: Show Output Channel"
+      },
+      {
+        "command": "syntaxTree.visualize",
+        "title": "Syntax Tree: Visualize"
+      }
+    ],
+    "configuration": [
+      {
+        "type": "object",
+        "title": "Syntax Tree",
+        "properties": {
+          "syntaxTree.additionalPlugins": {
+            "default": [],
+            "markdownDescription": "Registers [extra behaviors](https://github.com/ruby-syntax-tree/syntax_tree#plugins) with the language server.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "syntaxTree.printWidth": {
+            "default": 80,
+            "markdownDescription": "The width to be used when formatting code.",
+            "type": "number"
+          },
+          "syntaxTree.singleQuotes": {
+            "default": false,
+            "markdownDescription": "Uses single-quoted strings when possible.",
+            "type": "boolean"
+          },
+          "syntaxTree.trailingComma": {
+            "default": false,
+            "markdownDescription": "Adds a trailing comma to multi-line array literals, hash literals, and method parameters.",
+            "type": "boolean"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "title": "Advanced",
+        "properties": {
+          "syntaxTree.advanced.commandPath": {
+            "default": "",
+            "markdownDescription": "Absolute path to stree executable. Overrides default search order.\n\nSupports variables `${userHome}`, `${pathSeparator}`, and `${cwd}`",
+            "type": "string"
+          }
+        }
+      }
+    ],
+    "colors": []
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "package": "vsce package --no-yarn --githubBranch main",
+    "publish": "vsce publish --no-yarn --githubBranch main",
+    "test": "node ./out/test/runTest.js",
+    "vscode:prepublish": "yarn compile",
+    "watch": "tsc --watch -p ./"
+  },
+  "dependencies": {
+    "vscode-languageclient": "8.0.2"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.68.0",
+    "@vscode/test-electron": "^1.6.2",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.7.4",
+    "vsce": "^2.9.2"
+  },
+  "__metadata": {
+    "id": "b46118f9-0f6f-4320-9e2e-75c96492b4cb",
+    "publisherDisplayName": "ruby-syntax-tree",
+    "publisherId": "63942dce-de09-44d8-b863-4a1dbd5508c6",
+    "isPreReleaseVersion": false
+  }
 }
