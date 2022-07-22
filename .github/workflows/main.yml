@@ -3,8 +3,25 @@ on:
   - push
   - pull_request_target
 jobs:
-  ci:
-    name: CI
+  # Ensure that the distributables compile with esbuild (since tests use tsc)
+  build:
+    name: Build Distributables
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+          cache: yarn
+      - name: Compile extension
+        run: |
+          yarn install --frozen-lockfile
+          yarn compile
+  # Run tests (including a special build of extension w/ tsc, not esbuild)
+  test:
+    name: Run Tests
     strategy:
       matrix:
         os:
@@ -28,12 +45,12 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: ${{ matrix.ruby }}
-      - name: Install gem
+      - name: Install Gem
         run: gem install syntax_tree
-      - name: Compile extension
+      - name: Compile Tests
         run: |
           yarn install --frozen-lockfile
-          yarn compile
+          yarn test-compile
       - name: Setup GUI Environment
         run: |
           sudo apt-get install -yq dbus-x11 ffmpeg > /dev/null
@@ -100,9 +117,12 @@ jobs:
           start-stop-daemon --stop --pidfile ~/var/run/Xvfb.pid
           kill $DBUS_SESSION_BUS_PID
         if: always() && runner.os == 'Linux'
+  # Merge green PRs automatically if they come from repository owner or Dependabot
   automerge:
     name: AutoMerge
-    needs: ci
+    needs:
+      - build
+      - test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request_target' && (github.actor == github.repository_owner || github.actor == 'dependabot[bot]')
     steps:
