@@ -96,7 +96,7 @@
   "scripts": {
     "clean": "rm -rf ./out",
     "compile": "yarn run esbuild-base --sourcemap",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild --bundle --external:vscode --external:vscode-languageclient --format=cjs --outfile=out/extension.js --platform=node src/extension.ts",
     "package": "vsce package --no-yarn --githubBranch main",
     "publish": "vsce publish --no-yarn --githubBranch main",
     "test": "node ./out/test/runTest.js",
