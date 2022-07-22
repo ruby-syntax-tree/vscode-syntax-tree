@@ -13,6 +13,7 @@
   "bugs": {
     "url": "https://github.com/ruby-syntax-tree/vscode-syntax-tree/issues"
   },
+  "packageManager": "yarn@1.22.19",
   "engines": {
     "vscode": "^1.68.0"
   },
