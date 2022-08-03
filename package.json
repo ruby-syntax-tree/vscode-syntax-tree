@@ -18,6 +18,7 @@
     "vscode": "^1.68.0"
   },
   "activationEvents": [
+    "onLanguage:haml",
     "onLanguage:ruby",
     "workspaceContains:Gemfile.lock",
     "onCommand:syntaxTree.start",
