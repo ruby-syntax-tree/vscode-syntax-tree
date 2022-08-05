@@ -1,7 +1,7 @@
 name: Main
 on:
   - push
-  - pull_request_target
+  - pull_request
 jobs:
   # Ensure that the distributables compile with esbuild (since tests use tsc)
   build:
@@ -117,20 +117,3 @@ jobs:
           start-stop-daemon --stop --pidfile ~/var/run/Xvfb.pid
           kill $DBUS_SESSION_BUS_PID
         if: always() && runner.os == 'Linux'
-  # Merge green PRs automatically if they come from repository owner or Dependabot
-  automerge:
-    name: AutoMerge
-    needs:
-      - build
-      - test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target' && (github.actor == github.repository_owner || github.actor == 'dependabot[bot]')
-    steps:
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            github.pulls.merge({
-              owner: context.payload.repository.owner.login,
-              repo: context.payload.repository.name,
-              pull_number: context.payload.pull_request.number
-            })
