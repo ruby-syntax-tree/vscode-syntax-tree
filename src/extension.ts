@@ -6,7 +6,7 @@ import { promisify } from "util";
 import { ExtensionContext, commands, window, workspace } from "vscode";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 
-import * as variables from './variables';
+import * as variables from "./variables";
 import Visualize from "./Visualize";
 
 const promiseExec = promisify(exec);
@@ -92,7 +92,10 @@ export async function activate(context: ExtensionContext) {
     }
 
     // Configure print width.
-    args.push(`--print-width=${config.get<number>("printWidth")}`)
+    const printWidth = config.get<number>("printWidth");
+    if (printWidth) {
+      args.push(`--print-width=${printWidth}`);
+    }
 
     // There's a bit of complexity here. Basically, we try to locate
     // an stree executable in three places, in order of preference:
@@ -108,7 +111,7 @@ export async function activate(context: ExtensionContext) {
     // Explicit path varies between machines/users and is also victim to the
     // oversimplification problem.
     let run: ServerOptions = { command: "stree", args };
-    let commandPath = advancedConfig.get<string>('commandPath');
+    let commandPath = advancedConfig.get<string>("commandPath");
     if (commandPath) {
       commandPath = variables.substitute(commandPath);
       try {
@@ -128,7 +131,7 @@ export async function activate(context: ExtensionContext) {
       }
     }
 
-    outputChannel.appendLine(`Starting language server: ${run.command} ${run.args?.join(' ')}`);
+    outputChannel.appendLine(`Starting language server: ${run.command} ${run.args?.join(" ")}`);
 
     // Here, we instantiate the language client. This is the object that is
     // responsible for the communication and management of the Ruby subprocess.
@@ -147,26 +150,26 @@ export async function activate(context: ExtensionContext) {
       // add the various features to the extension. Each of them in turn
       // implements Disposable so that they clean up their own resources.
       visualizer = new Visualize(languageClient, outputChannel);
-      context.subscriptions.push(
-        visualizer
-      );
-    } catch (e: any) {
+      context.subscriptions.push(visualizer);
+    } catch (error) {
       languageClient = null;
-      const items = ['Restart']
-      let msg = 'Something went wrong.';
-      if (typeof e === 'string') {
-        if (/ENOENT/.test(e)) {
-          msg = 'Command not found. Is the syntax_tree RubyGem installed?';
-          items.unshift('Install Gem');
+
+      const items = ["Restart"];
+      let msg = "Something went wrong.";
+
+      if (typeof error === "string") {
+        if (/ENOENT/.test(error)) {
+          msg = "Command not found. Is the syntax_tree gem installed?";
+          items.unshift("Install Gem");
         }
       }
 
       const action = await window.showErrorMessage(msg, ...items);
       switch (action) {
-        case 'Install Gem':
+        case "Install Gem":
           installGem();
           break;
-        case 'Restart':
+        case "Restart":
           startLanguageServer();
           break;
       }
@@ -196,12 +199,11 @@ export async function activate(context: ExtensionContext) {
   // This function is called when the user wants to recover from ENOENT
   // on start. It starts the language server afterward.
   async function installGem() {
-    const cwd = getCWD();
     try {
-      await promiseExec("gem install syntax_tree", { cwd });
+      await promiseExec("gem install syntax_tree", { cwd: getCWD() });
       startLanguageServer();
-    } catch (e) {
-      outputChannel.appendLine("Error installing gem: " + e);
+    } catch (error) {
+      outputChannel.appendLine(`Error installing gem: ${error}`);
     }
   }
 

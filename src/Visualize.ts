@@ -1,4 +1,4 @@
-import { commands, Disposable, languages, OutputChannel, ProviderResult, TextDocumentContentProvider, Uri, ViewColumn, window, workspace } from "vscode";
+import { Disposable, languages, OutputChannel, ProviderResult, TextDocumentContentProvider, Uri, ViewColumn, window, workspace } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 
 class Visualize implements Disposable, TextDocumentContentProvider {
