@@ -65,7 +65,6 @@
             "type": "array"
           },
           "syntaxTree.printWidth": {
-            "default": 80,
             "markdownDescription": "The width to be used when formatting code.",
             "type": "number"
           },
@@ -139,7 +138,8 @@
     "rules": {
       "quotes": ["error", "double"],
       "semi": "error"
-    }
+    },
+    "ignorePatterns": ["out"]
   },
   "__metadata": {
     "id": "b46118f9-0f6f-4320-9e2e-75c96492b4cb",

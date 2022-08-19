@@ -92,7 +92,10 @@ export async function activate(context: ExtensionContext) {
     }
 
     // Configure print width.
-    args.push(`--print-width=${config.get<number>("printWidth")}`);
+    const printWidth = config.get<number>("printWidth");
+    if (printWidth) {
+      args.push(`--print-width=${printWidth}`);
+    }
 
     // There's a bit of complexity here. Basically, we try to locate
     // an stree executable in three places, in order of preference:
