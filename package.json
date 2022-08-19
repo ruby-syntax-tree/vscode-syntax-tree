@@ -3,7 +3,7 @@
   "displayName": "Syntax Tree",
   "description": "VSCode support for the syntax_tree gem",
   "icon": "doc/logo.png",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "publisher": "ruby-syntax-tree",
   "repository": {
     "type": "git",
