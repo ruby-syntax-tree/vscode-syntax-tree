@@ -1,13 +1,13 @@
-import * as assert from 'assert';
-import * as path from 'path';
-import { TextEncoder } from 'util';
+import * as assert from "assert";
+import * as path from "path";
+import { TextEncoder } from "util";
 
-import { Uri, commands, window, workspace } from 'vscode';
+import { Uri, commands, window, workspace } from "vscode";
 
-import { WORKSPACE_DIR } from './setup';
+import { WORKSPACE_DIR } from "./setup";
 
 export async function reset() {
-  await commands.executeCommand('workbench.action.closeAllEditors');
+  await commands.executeCommand("workbench.action.closeAllEditors");
 }
 
 export async function createEditor(content: string) {
@@ -25,21 +25,21 @@ export function findNewestEditor() {
 }
 
 export function formatDocument() {
-  return commands.executeCommand('editor.action.formatDocument', 'ruby-syntax-tree.vscode-syntax-tree');
+  return commands.executeCommand("editor.action.formatDocument", "ruby-syntax-tree.vscode-syntax-tree");
 }
 
 export function restart() {
-  return commands.executeCommand('syntaxTree.restart');
+  return commands.executeCommand("syntaxTree.restart");
 }
 
 export function start() {
-  return commands.executeCommand('syntaxTree.start');
+  return commands.executeCommand("syntaxTree.start");
 }
 
 export function stop() {
-  return commands.executeCommand('syntaxTree.stop');
+  return commands.executeCommand("syntaxTree.stop");
 }
 
 export function visualize() {
-  return commands.executeCommand('syntaxTree.visualize');
+  return commands.executeCommand("syntaxTree.visualize");
 }

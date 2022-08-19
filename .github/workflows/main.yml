@@ -18,6 +18,7 @@ jobs:
       - name: Compile extension
         run: |
           yarn install --frozen-lockfile
+          yarn lint
           yarn compile
   # Run tests (including a special build of extension w/ tsc, not esbuild)
   test:
