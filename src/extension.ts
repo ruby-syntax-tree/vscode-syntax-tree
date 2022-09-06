@@ -139,6 +139,7 @@ export async function activate(context: ExtensionContext) {
       documentSelector: [
         { scheme: "file", language: "haml" },
         { scheme: "file", language: "ruby" },
+        { scheme: "file", pattern: "**/Gemfile" },
       ],
       outputChannel
     });
