@@ -183,6 +183,12 @@ export async function activate(context: ExtensionContext) {
       args.push(`--print-width=${printWidth}`);
     }
 
+    // Configure ignore files if any.
+    const ignoreFiles = config.get<string>("ignoreFiles");
+    if (ignoreFiles) {
+      args.push(`--ignore-files=${ignoreFiles}`);
+    }
+
     const run = await getServerOptions(args);
     outputChannel.appendLine(`Starting language server: ${run.command} ${run.args?.join(" ")}`);
 

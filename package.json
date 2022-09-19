@@ -64,6 +64,11 @@
             },
             "type": "array"
           },
+          "syntaxTree.ignoreFiles": {
+            "default": "",
+            "markdownDescription": "A glob pattern of files to ignore for formatting.",
+            "type": "string"
+          },
           "syntaxTree.printWidth": {
             "markdownDescription": "The width to be used when formatting code.",
             "type": "number"
