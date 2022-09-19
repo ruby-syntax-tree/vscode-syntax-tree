@@ -2,11 +2,12 @@
 
 import { exec } from "child_process";
 import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import { promisify } from "util";
 import { ExtensionContext, commands, window, workspace } from "vscode";
-import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
+import { LanguageClient, Executable } from "vscode-languageclient/node";
 
-import * as variables from "./variables";
 import Visualize from "./Visualize";
 
 const promiseExec = promisify(exec);
@@ -50,9 +51,96 @@ export async function activate(context: ExtensionContext) {
     })
   );
 
+  // We're returning a Promise from this function that will start the Ruby
+  // subprocess.
+  await startLanguageServer();
+
   // If there's an open folder, use it as cwd when spawning commands
   // to promote correct package & language versioning.
-  const getCWD = () => workspace.workspaceFolders?.[0]?.uri?.fsPath || process.cwd();
+  function getCWD() {
+    return workspace.workspaceFolders?.[0]?.uri?.fsPath || process.cwd();
+  }
+
+  // There's a bit of complexity here. Basically, we try to locate
+  // an stree executable in three places, in order of preference:
+  //   1. Explicit path from advanced settings, if provided
+  //   2. The bundle inside CWD, if syntax_tree is in the bundle
+  //   3. Somewhere in $PATH that contains "ruby" in the director
+  //   4. Anywhere in $PATH (i.e. system gem)
+  //
+  // None of these approaches is perfect. System gem might be correct if the
+  // right environment variables are set, but it's a bit of a prayer. Bundled
+  // gem is better, but we make the gross oversimplification that the
+  // workspace only has one root and that the bundle is at root of the
+  // workspace -- which is not true for large projects or monorepos.
+  // Explicit path varies between machines/users and is also victim to the
+  // oversimplification problem.
+  async function getServerOptions(args: string[]): Promise<Executable> {
+    const advancedConfig = workspace.getConfiguration("syntaxTree.advanced");
+    let value = advancedConfig.get<string>("commandPath");
+
+    // If a value is given on the command line, attempt to use it.
+    if (value) {
+      // First, substitute in any variables that may have been present in the
+      // given value to the configuration.
+      const substitution = new RegExp("\\$\\{([^}]*)\\}");
+
+      for (let match = substitution.exec(value); match; match = substitution.exec(value)) {
+        switch (match[1]) {
+          case "cwd":
+            value = value.replace(match[0], process.cwd());
+            break;
+          case "pathSeparator":
+            value = value.replace(match[0], path.sep);
+            break;
+          case "userHome":
+            value = value.replace(match[0], os.homedir());
+            break;
+        }
+      }
+
+      // Next, attempt to stat the executable path. If it's a file, we're good.
+      try {
+        if (fs.statSync(value).isFile()) {
+          return { command: value, args };
+        }
+      } catch {
+        outputChannel.appendLine(`Ignoring bogus commandPath (${value} does not exist).`);
+      }
+    }
+
+    // Otherwise, we're going to try using bundler to find the executable.
+    try {
+      const cwd = getCWD();
+      await promiseExec("bundle show syntax_tree", { cwd });
+      return { command: "bundle", args: ["exec", "stree"].concat(args), options: { cwd } };
+    } catch {
+      // Do nothing.
+    }
+
+    // Otherwise, we're going to try parsing the PATH environment variable to
+    // find the executable.
+    const executablePaths = await Promise.all((process.env.PATH || "")
+      .split(path.delimiter)
+      .filter((directory) => directory.includes("ruby"))
+      .map((directory) => {
+        const executablePath = path.join(directory, "stree");
+
+        return fs.promises.stat(executablePath).then(
+          (stat) => stat.isFile() ? executablePath : null,
+          () => null
+        );
+      }));
+
+    for (const executablePath in executablePaths) {
+      if (executablePath) {
+        return { command: executablePath, args };
+      }
+    }
+
+    // Otherwise, fall back to the global stree lookup.
+    return { command: "stree", args };
+  }
 
   // This function is called when the extension is activated or when the
   // language server is restarted.
@@ -64,8 +152,6 @@ export async function activate(context: ExtensionContext) {
     // The top-level configuration group is syntaxTree. Broadly useful settings
     // are under that group.
     const config = workspace.getConfiguration("syntaxTree");
-    // More obscure settings for power users live in a subgroup.
-    const advancedConfig = workspace.getConfiguration("syntaxTree.advanced");
 
     // The args are going to be passed to the stree executable. It's important
     // that it lines up with what the CLI expects.
@@ -97,40 +183,7 @@ export async function activate(context: ExtensionContext) {
       args.push(`--print-width=${printWidth}`);
     }
 
-    // There's a bit of complexity here. Basically, we try to locate
-    // an stree executable in three places, in order of preference:
-    //   1. Explicit path from advanced settings, if provided
-    //   2. The bundle inside CWD, if syntax_tree is in the bundle
-    //   3. Anywhere in $PATH (i.e. system gem)
-    //
-    // None of these approaches is perfect. System gem might be correct if the
-    // right environment variables are set, but it's a bit of a prayer. Bundled
-    // gem is better, but we make the gross oversimplification that the
-    // workspace only has one root and that the bundle is at root of the
-    // workspace -- which is not true for large projects or monorepos.
-    // Explicit path varies between machines/users and is also victim to the
-    // oversimplification problem.
-    let run: ServerOptions = { command: "stree", args };
-    let commandPath = advancedConfig.get<string>("commandPath");
-    if (commandPath) {
-      commandPath = variables.substitute(commandPath);
-      try {
-        if (fs.statSync(commandPath).isFile()) {
-          run = { command: commandPath, args };
-        }
-      } catch (err) {
-        outputChannel.appendLine(`Ignoring bogus commandPath (${commandPath} does not exist); falling back to global.`);
-      }
-    } else {
-      try {
-        const cwd = getCWD();
-        await promiseExec("bundle show syntax_tree", { cwd });
-        run = { command: "bundle", args: ["exec", "stree"].concat(args), options: { cwd } };
-      } catch {
-        // No-op (just keep using the global stree)
-      }
-    }
-
+    const run = await getServerOptions(args);
     outputChannel.appendLine(`Starting language server: ${run.command} ${run.args?.join(" ")}`);
 
     // Here, we instantiate the language client. This is the object that is
@@ -207,10 +260,6 @@ export async function activate(context: ExtensionContext) {
       outputChannel.appendLine(`Error installing gem: ${error}`);
     }
   }
-
-  // We're returning a Promise from this function that will start the Ruby
-  // subprocess.
-  await startLanguageServer();
 }
 
 // This is the expected top-level export that is called by VSCode when the
