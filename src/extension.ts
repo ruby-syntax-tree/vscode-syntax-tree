@@ -132,7 +132,7 @@ export async function activate(context: ExtensionContext) {
         );
       }));
 
-    for (const executablePath in executablePaths) {
+    for (const executablePath of executablePaths) {
       if (executablePath) {
         return { command: executablePath, args };
       }
