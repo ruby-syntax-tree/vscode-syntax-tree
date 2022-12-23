@@ -120,8 +120,8 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.68.0",
-    "@typescript-eslint/eslint-plugin": "^5.33.1",
-    "@typescript-eslint/parser": "^5.33.1",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
     "@vscode/test-electron": "^2.2.0",
     "esbuild": "^0.16.1",
     "eslint": "^8.22.0",
@@ -141,10 +141,15 @@
       "plugin:@typescript-eslint/recommended"
     ],
     "rules": {
-      "quotes": ["error", "double"],
+      "quotes": [
+        "error",
+        "double"
+      ],
       "semi": "error"
     },
-    "ignorePatterns": ["out"]
+    "ignorePatterns": [
+      "out"
+    ]
   },
   "__metadata": {
     "id": "b46118f9-0f6f-4320-9e2e-75c96492b4cb",
