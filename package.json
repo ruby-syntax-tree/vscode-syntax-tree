@@ -113,7 +113,7 @@
     "watch": "yarn run esbuild-base --sourcemap --watch"
   },
   "dependencies": {
-    "vscode-languageclient": "8.0.2"
+    "vscode-languageclient": "8.1.0"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
