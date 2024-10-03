@@ -196,6 +196,7 @@ export async function activate(context: ExtensionContext) {
     // responsible for the communication and management of the Ruby subprocess.
     languageClient = new LanguageClient("Syntax Tree", { run, debug: run }, {
       documentSelector: [
+        { scheme: "file", language: "erb" },
         { scheme: "file", language: "haml" },
         { scheme: "file", language: "ruby" },
         { scheme: "file", pattern: "**/Gemfile" },
