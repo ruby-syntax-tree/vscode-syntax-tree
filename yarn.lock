@@ -1564,9 +1564,9 @@ mkdirp-classic@^0.5.2, mkdirp-classic@^0.5.3:
   integrity sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==
 
 mocha@^10.0.0:
-  version "10.7.3"
-  resolved "https://registry.yarnpkg.com/mocha/-/mocha-10.7.3.tgz#ae32003cabbd52b59aece17846056a68eb4b0752"
-  integrity sha512-uQWxAu44wwiACGqjbPYmjo7Lg8sFrS3dQe7PP2FQI+woptP4vZXSMcfMyFL/e1yFEeEpV4RtyTpZROOKmxis+A==
+  version "10.8.0"
+  resolved "https://registry.yarnpkg.com/mocha/-/mocha-10.8.0.tgz#22821af2792a017643ce6250998f7a0a16181356"
+  integrity sha512-2Rh6KiLO56bXjfW77YQWNJGo76U3eMiqHshJHdm8Q89moNFBy6426qwRxCEKEFGSsUWhMOASVFq+DUSTwewyew==
   dependencies:
     ansi-colors "^4.1.3"
     browser-stdout "^1.3.1"
