@@ -321,9 +321,9 @@
   integrity sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==
 
 "@types/vscode@^1.68.0":
-  version "1.99.1"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.99.1.tgz#bde6e2d9ccbe0493fded98ad639bf2671b8ec9ee"
-  integrity sha512-cQlqxHZ040ta6ovZXnXRxs3fJiTmlurkIWOfZVcLSZPcm9J4ikFpXuB7gihofGn5ng+kDVma5EmJIclfk0trPQ==
+  version "1.100.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.100.0.tgz#35cd628a86b11587856df94be94054aab01f2f17"
+  integrity sha512-4uNyvzHoraXEeCamR3+fzcBlh7Afs4Ifjs4epINyUX/jvdk0uzLnwiDY35UKDKnkCHP5Nu3dljl2H8lR6s+rQw==
 
 "@typescript-eslint/eslint-plugin@^5.47.0":
   version "5.62.0"
