@@ -15,17 +15,12 @@
   },
   "packageManager": "yarn@1.22.19",
   "engines": {
-    "vscode": "^1.68.0"
+    "vscode": "^1.75.0"
   },
   "activationEvents": [
     "onLanguage:haml",
     "onLanguage:ruby",
-    "workspaceContains:Gemfile.lock",
-    "onCommand:syntaxTree.start",
-    "onCommand:syntaxTree.stop",
-    "onCommand:syntaxTree.restart",
-    "onCommand:syntaxTree.showOutputChannel",
-    "onCommand:syntaxTree.visualize"
+    "workspaceContains:Gemfile.lock"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -116,12 +111,11 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@types/glob": "^9.0.0",
     "@types/mocha": "^10.0.0",
     "@types/node": "^24.0.0",
-    "@types/vscode": "^1.68.0",
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
     "@vscode/test-electron": "^2.2.0",
     "esbuild": "^0.25.0",
     "eslint": "^9.12.0",
