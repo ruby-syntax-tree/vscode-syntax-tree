@@ -776,9 +776,9 @@
     "@vscode/vsce-sign-win32-x64" "2.0.5"
 
 "@vscode/vsce@^3.6.0":
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-3.6.1.tgz#1a7b3ecc15306eb1ab383ab23cf01b1f52b2e391"
-  integrity sha512-UXtMgeCBl/t5zjn1TX1v1sl5L/oIv3Xc3pkKPGzaqeFCIkp5+wfFFDBXTWDt3d5uUulHnZKORHkMIsKNe9+k5A==
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-3.6.2.tgz#cefd2802f1dec24fca51293ae563e11912f545fd"
+  integrity sha512-gvBfarWF+Ii20ESqjA3dpnPJpQJ8fFJYtcWtjwbRADommCzGg1emtmb34E+DKKhECYvaVyAl+TF9lWS/3GSPvg==
   dependencies:
     "@azure/identity" "^4.1.0"
     "@secretlint/node" "^10.1.2"
