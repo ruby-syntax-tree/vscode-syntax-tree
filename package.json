@@ -108,7 +108,7 @@
     "watch": "yarn run esbuild-base --sourcemap --watch"
   },
   "dependencies": {
-    "vscode-languageclient": "10.1.0"
+    "vscode-languageclient": "10.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
