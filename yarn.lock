@@ -504,9 +504,9 @@
     undici-types "~8.9.0"
 
 "@types/vscode@^1.75.0":
-  version "1.138.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.138.0.tgz#516d9e50b0056a56b3daee81e0dc3ebee914ddb7"
-  integrity sha512-DhlvrucJa8n6EHst7qQcXOcjLKs/VRTQy55plLO+RN74jonYsr/t9dd66zBnAyz1tpDig0okQAxuoPHpVNje2g==
+  version "1.140.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.140.0.tgz#cc1db266d6e7a2fe7a0a7ed7f96620f267344db2"
+  integrity sha512-KAB5RBZIgnUhpp4mKsVJPPHLOQKu6WtGy2xpfWjaajEXO4xIIC+UESAXLiQ9ewx6QD1uBmvC/S8BJzkbvv4bRA==
 
 "@typescript-eslint/eslint-plugin@8.71.0", "@typescript-eslint/eslint-plugin@^8.37.0":
   version "8.71.0"
